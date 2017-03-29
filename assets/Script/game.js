@@ -11,6 +11,7 @@ var PlayRoler = cc.Enum({
     Green: 3,
 });
 
+
 cc.Class({
     extends: cc.Component,
     
@@ -30,6 +31,7 @@ cc.Class({
             type: cc.Button
         },
         
+        needPoint: 6, //允许出场点数
         rollPoint: 0,
         curPlayerIdx: 0, 
         gameStatus: 0, //0-can roll, 1-rolling, 2-playing
@@ -63,7 +65,8 @@ cc.Class({
             type: [cc.Node]
         },
         
-        planePrefabSprite: []
+        planePrefabSprite: [],
+        
     },
 
     // use this for initialization
@@ -129,6 +132,7 @@ cc.Class({
                 newPlane.getComponent(cc.Sprite).spriteFrame = this.planePrefabSprite[playerId];
                 //newPlane.getChildByName('plane_pic').getComponent(cc.Sprite).spriteFrame.setTexture(texture); 
                 newPlane.setPosition(newPlane.startPos);
+                this.planeList.push(newPlane);
                 
                 //设置点击事件
                 newPlane.on(cc.Node.EventType.TOUCH_END, this.onPlaneClick, this);
@@ -145,6 +149,15 @@ cc.Class({
            //播放动画，结束后可以开始飞行
            //todo
            
+           if (this.rollPoint != this.needPoint) {
+               //判断是否有已出场的，没有则直接下一个
+               if () {
+                   //等待用户点击
+               } else {
+                   this.nextPlayer();
+               }
+           }
+           
            this.gameStatus = GameStateType.Playing;
         }
     },
@@ -154,7 +167,8 @@ cc.Class({
         cc.log('click plane, owner:' + plane.playerId);
         
         if (this.gameStatus == GameStateType.Playing &&
-            plane.playerId == this.playerSeq[this.curPlayerIdx]) {
+            plane.playerId == this.playerSeq[this.curPlayerIdx] &&
+            plane.state != 2) {
             
             cc.log('click plane, owner:' + plane.playerId + ' you can fly.' );
             
