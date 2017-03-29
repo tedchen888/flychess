@@ -7,7 +7,6 @@ cc.Class({
         state: 0,//0-begining, 1-flying, 2-finished
         
         startPos: cc.p,
-        plane_pic: cc.Sprite
     },
 
     // use this for initialization

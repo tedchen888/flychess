@@ -31,7 +31,7 @@ cc.Class({
         },
         
         rollPoint: 0,
-        curPlayerIdx: 0,  //0-red, 1-yellow, 2-blue, 3-green
+        curPlayerIdx: 0, 
         gameStatus: 0, //0-can roll, 1-rolling, 2-playing
         planeNum: 0,
         //顺序
@@ -40,6 +40,30 @@ cc.Class({
         player_planeStartPos: [],
         //路径
         player_planePath: [],
+        
+        redSpriteFrame: {
+            default:null,
+            type:cc.SpriteFrame
+        },
+        yellowSpriteFrame: {
+            default:null,
+            type:cc.SpriteFrame
+        },
+        blueSpriteFrame: {
+            default:null,
+            type:cc.SpriteFrame
+        },
+        greenSpriteFrame: {
+            default:null,
+            type:cc.SpriteFrame
+        },
+        
+        planeList: {
+            default: [],
+            type: [cc.Node]
+        },
+        
+        planePrefabSprite: []
     },
 
     // use this for initialization
@@ -63,7 +87,12 @@ cc.Class({
         this.player_planeStartPos[2] = [cc.p(208,438), cc.p(280,438), cc.p(280,352), cc.p(208,352)]; //PlayRoler.Blue
         this.player_planeStartPos[3] = [cc.p(208,-115), cc.p(280,-115), cc.p(280,-201), cc.p(208,-201)]; //PlayRoler.Green
         
-        this.player_planePath[0] = [];
+        this.planePrefabSprite[0] = this.redSpriteFrame;
+        this.planePrefabSprite[1] = this.yellowSpriteFrame;
+        this.planePrefabSprite[2] = this.blueSpriteFrame;
+        this.planePrefabSprite[3] = this.greenSpriteFrame;
+        
+        this.player_planePath[0] = [cc.p(-148,-215)];
         this.player_planePath[1] = [];
         this.player_planePath[2] = [];
         this.player_planePath[3] = [];
@@ -74,19 +103,6 @@ cc.Class({
     // called every frame
     update: function (dt) {
 
-    },
-    
-    rollDices: function (event) {
-        if (this.gameStatus == GameStateType.Begining) {
-           this.rollPoint = parseInt(cc.random0To1() * 6) + 1;
-           this.debuglog.string = 'Point:' + this.rollPoint.toString();
-           this.gameStatus = GameStateType.Rolling;
-        }
-       //这里的 event 是一个 EventCustom 对象，你可以通过 event.detail 获取 Button 组件
-       var button = event.detail;
-       //do whatever you want with button
-       //另外，注意这种方式注册的事件，也无法传递 customEventData
-       
     },
     
     nextPlayer: function() {
@@ -107,13 +123,60 @@ cc.Class({
                 newPlane.startPos =  startPosArray[num];
                 this.node.addChild(newPlane);
                 
-                cc.log('resources/plane/plane_' + playerId.toString() + '.png');
-                var realUrl = cc.url.raw('resources/plane/plane_' + playerId.toString() + '.png');
-                var texture = cc.textureCache.addImage(realUrl);
-                //newPlane.getComponent(cc.Sprite).spriteFrame.setTexture(texture);   //根据player更换素材
-                newPlane.getChildByName('plane_pic').getComponent(cc.Sprite).spriteFrame.setTexture(texture); 
+                //cc.log('resources/plane/plane_' + playerId.toString() + '.png');
+                //var realUrl = cc.url.raw('resources/plane/plane_' + playerId.toString() + '.png');
+                //var texture = cc.textureCache.addImage(realUrl);
+                newPlane.getComponent(cc.Sprite).spriteFrame = this.planePrefabSprite[playerId];
+                //newPlane.getChildByName('plane_pic').getComponent(cc.Sprite).spriteFrame.setTexture(texture); 
                 newPlane.setPosition(newPlane.startPos);
+                
+                //设置点击事件
+                newPlane.on(cc.Node.EventType.TOUCH_END, this.onPlaneClick, this);
             }
         }
+    },
+    
+    //骰子
+    rollDices: function (event) {
+        if (this.gameStatus == GameStateType.Begining) {
+           this.rollPoint = parseInt(cc.random0To1() * 6) + 1;
+           this.debuglog.string = 'Point:' + this.rollPoint.toString();
+           this.gameStatus = GameStateType.Rolling;
+           //播放动画，结束后可以开始飞行
+           //todo
+           
+           this.gameStatus = GameStateType.Playing;
+        }
+    },
+    //点击飞机
+    onPlaneClick: function(event) {
+        var plane = event.target;
+        cc.log('click plane, owner:' + plane.playerId);
+        
+        if (this.gameStatus == GameStateType.Playing &&
+            plane.playerId == this.playerSeq[this.curPlayerIdx]) {
+            
+            cc.log('click plane, owner:' + plane.playerId + ' you can fly.' );
+            
+            //fly
+            this.movePlane(plane);
+            
+            //完整后开始下一轮
+            this.nextPlayer();
+            this.gameStatus = GameStateType.Begining;
+        }
+    },
+    //移动飞机
+    movePlane: function(plane) {
+        //根据点数(步数)和当前位置得到下一个位置
+        var path = this.player_planePath[plane.playerId];
+       
+        if (plane.curPathIndex + this.rollPoint < path.length) {
+             plane.curPathIndex += this.rollPoint;  //当前步数加上点数
+        } else { //回退N步
+            plane.curPathIndex += (plane.curPathIndex + this.rollPoint - path.length);
+        }
+        
+        plane.setPosition(path[plane.curPathIndex]); //得到在地图中的位置
     }
 });
