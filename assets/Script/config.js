@@ -4,7 +4,7 @@ function PathNode(x, y, flag) {
     this.flag = flag;
 }
 
-var cfg = {    
+var map = {    
     player_planePath:[],
     
     load: function() {
@@ -19,7 +19,7 @@ var cfg = {
                 //let list=res;  
                 //cc.log("loadMap:"  + txt);  
                 var map_json = JSON.parse(txt);
-                self.player_planePath[0] = [];
+                //cc.log(map_json.red);
                 
                 self.player_planePath[0] = [];
                 self.parsePath(map_json.red, self.player_planePath[0]);                
@@ -38,16 +38,13 @@ var cfg = {
     },
     
     parsePath: function(cfg, nodePathList) {
-        cc.log(cfg);
-        for (var node in cfg) {
-            cc.log(node);
-            for (var param in node) {
-                //var x = param[0];
-                //var y = param[1];
-                //var flag = param[2];
-                //nodePathList.push(new PathNode(x, y, flag));
-                //cc.log("loadnode x:" + param[0].toString() + " y:" + param[1].toString() + "f:" + param[2].toString());
-            }
+        //cc.log(cfg);
+        for (var i = 0; i < cfg.length; ++i) {
+            var x = cfg[i][0];
+            var y = cfg[i][1];
+            var flag = cfg[i][2];
+            nodePathList.push(new PathNode(x, y, flag));
+            //cc.log("loadnode x:" + x.toString() + " y:" + y.toString() + "f:" + flag.toString());
         }
     }
 };
@@ -73,7 +70,7 @@ var PlaneState = cc.Enum({
 
 //config.load();
 
-module.exports.cfg = cfg;
+module.exports.map = map;
 module.exports.gameState = GameState;
 module.exports.role = Role;
 module.exports.planeState = PlaneState;
