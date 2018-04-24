@@ -1,13 +1,17 @@
 {
   "excludeScenes": [],
+  "includeAnySDK": false,
+  "includeSdk": [
+    "anysdk"
+  ],
   "orientation": {
     "landscapeLeft": true,
     "landscapeRight": true,
     "portrait": false,
     "upsideDown": false
   },
-  "packageName": "org.cocos2d.helloworld",
-  "startScene": "2d2f792f-a40c-49bb-a189-ed176a246e49",
-  "title": "hello_world",
+  "packageName": "org.cocos2d.flychess",
+  "startScene": "f5fd0b9a-b251-4f4d-86d1-fd6e578563d4",
+  "title": "flychess",
   "webOrientation": "auto"
 }
